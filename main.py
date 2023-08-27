@@ -397,7 +397,7 @@ class Main_Window(pyglet.window.Window):
         self.dheight = self.height
     def start_splash_screen(self):
         pyglet.gl.glClearColor(0.00,0.80,0.27, 1)
-        self.splash_screen_title = pyglet.text.Label('Wamsy Dev',
+        self.splash_screen_title = pyglet.text.Label('AAAAAA',
                                 font_name='Arial', bold=True,
                                 font_size=96,
                                 x=self.width//2, y=self.height//2 + 300,
