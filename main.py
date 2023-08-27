@@ -456,18 +456,21 @@ class Main_Window(pyglet.window.Window):
         self.level_select_batch = pyglet.graphics.Batch()
         self.endgame_batch = pyglet.graphics.Batch()
     def load_groups(self):
-        self.m_bottom_order = pyglet.graphics.Group(order=-3)
-        self.m_middle_order = pyglet.graphics.Group(order=-2)
-        self.m_top_order = pyglet.graphics.Group(order=-1)
-        self.g_background_order = pyglet.graphics.Group(order=1)
-        self.g_block_order = pyglet.graphics.Group(order=2)
-        self.g_player_order = pyglet.graphics.Group(order=3)
-        self.g_gui_order = pyglet.graphics.Group(order=4)
-        self.ledit_bottom_order = pyglet.graphics.Group(order=5)
-        self.ledit_middle_order = pyglet.graphics.Group(order=6)
-        self.ledit_top_order = pyglet.graphics.Group(order=7)
-        self.ledit_gui_order = pyglet.graphics.Group(order=8)
-        self.ledit_menu_order = pyglet.graphics.Group(order=9)
+        try:
+            self.m_bottom_order = pyglet.graphics.Group(order=-3)
+            self.m_middle_order = pyglet.graphics.Group(order=-2)
+            self.m_top_order = pyglet.graphics.Group(order=-1)
+            self.g_background_order = pyglet.graphics.Group(order=1)
+            self.g_block_order = pyglet.graphics.Group(order=2)
+            self.g_player_order = pyglet.graphics.Group(order=3)
+            self.g_gui_order = pyglet.graphics.Group(order=4)
+            self.ledit_bottom_order = pyglet.graphics.Group(order=5)
+            self.ledit_middle_order = pyglet.graphics.Group(order=6)
+            self.ledit_top_order = pyglet.graphics.Group(order=7)
+            self.ledit_gui_order = pyglet.graphics.Group(order=8)
+            self.ledit_menu_order = pyglet.graphics.Group(order=9)
+        except Exception:
+            pass
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         match self.gamestage:
             case "level_select":
