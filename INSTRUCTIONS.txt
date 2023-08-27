@@ -1,0 +1,13 @@
+You need to click to make the spaceship jump
+
+
+
+LEVEL EDITOR:
+
+If you want to use the level editor then the instructions as follow:
+
+wasd or arrow keys to move across the level you are editing
+use e and q to switch the block you are using
+use r and t to rotate the block you are about to place
+press y to set spawn at that point
+press f to delete the block that is colliding with the crosshair
