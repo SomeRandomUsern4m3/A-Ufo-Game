@@ -279,6 +279,7 @@ class Main_Window(pyglet.window.Window):
         pyglet.gl.glClearColor(0,0,0,1)
         self.save_level_to_file()
         self.editing_level = False
+        self.in_menu = False
         self.level_editor_batch = pyglet.graphics.Batch()
         self.gamestage = "menu"
     def create_level_editor_menu(self):
@@ -470,7 +471,18 @@ class Main_Window(pyglet.window.Window):
             self.ledit_gui_order = pyglet.graphics.Group(order=8)
             self.ledit_menu_order = pyglet.graphics.Group(order=9)
         except Exception:
-            pass
+            self.m_bottom_order = pyglet.graphics.OrderedGroup(order=-3)
+            self.m_middle_order = pyglet.graphics.OrderedGroup(order=-2)
+            self.m_top_order = pyglet.graphics.OrderedGroup(order=-1)
+            self.g_background_order = pyglet.graphics.OrderedGroup(order=1)
+            self.g_block_order = pyglet.graphics.OrderedGroup(order=2)
+            self.g_player_order = pyglet.graphics.OrderedGroup(order=3)
+            self.g_gui_order = pyglet.graphics.OrderedGroup(order=4)
+            self.ledit_bottom_order = pyglet.graphics.OrderedGroup(order=5)
+            self.ledit_middle_order = pyglet.graphics.OrderedGroup(order=6)
+            self.ledit_top_order = pyglet.graphics.OrderedGroup(order=7)
+            self.ledit_gui_order = pyglet.graphics.OrderedGroup(order=8)
+            self.ledit_menu_order = pyglet.graphics.OrderedGroup(order=9)
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         match self.gamestage:
             case "level_select":
