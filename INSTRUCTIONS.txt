@@ -1,5 +1,7 @@
 You need to click to make the spaceship jump
-
+The goal is to collect all coins in a level
+Dont crash or else you will die
+Press Esc to access the menus and or exit out of places
 
 
 LEVEL EDITOR:
@@ -11,3 +13,4 @@ use e and q to switch the block you are using
 use r and t to rotate the block you are about to place
 press y to set spawn at that point
 press f to delete the block that is colliding with the crosshair
+when finished press ESC then click on save to save the level

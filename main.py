@@ -212,8 +212,10 @@ class Main_Window(pyglet.window.Window):
                     i.sprite.x -= self.editor_move_speed * dt
             if i == pyglet.window.key.T:
                 self.level_editor_block_set_rotation += self.editor_rotate_speed
+                self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
             if i == pyglet.window.key.R:
                 self.level_editor_block_set_rotation -= self.editor_rotate_speed
+                self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
             self.block_rotation_label.text = f"Block Rotation: {self.level_editor_block_set_rotation}"
     def shuffle_block_images(self, chosen_index=0):
         index = 0
@@ -259,17 +261,20 @@ class Main_Window(pyglet.window.Window):
             #bookmark
             self.json_blocks.append([i.image_location, i.true_x, i.true_y, i.sprite.rotation, 0, determine_coin])
         with open(self.editing_map, 'w+') as file:
-            file.write("{\n" + f'"name": "{self.level_name}",\n"blocks": [[')
-            index = 0
-            for i in self.json_blocks:
-                file.write(json.dumps(i[0]))
-                if index < len(self.json_blocks) - 1:
-                    file.write(f",{i[1]},{i[2]}, {i[3]}, {i[4]}, {i[5]}],[")
-                else:
-                    file.write(f",{i[1]},{i[2]}, {i[3]}, {i[4]}, {i[5]}]]")
-                index += 1
-            index = 0
-            file.write(f',\n"player_start_pos": {self.level_editor_set_spawn}\n' + '}')
+            if not self.blocks == []:
+                file.write("{\n" + f'"name": "{self.level_name}",\n"blocks": [[')
+                index = 0
+                for i in self.json_blocks:
+                    file.write(json.dumps(i[0]))
+                    if index < len(self.json_blocks) - 1:
+                        file.write(f",{i[1]},{i[2]}, {i[3]}, {i[4]}, {i[5]}],[")
+                    else:
+                        file.write(f",{i[1]},{i[2]}, {i[3]}, {i[4]}, {i[5]}]]")
+                    index += 1
+                index = 0
+                file.write(f',\n"player_start_pos": {self.level_editor_set_spawn}\n' + '}')
+            else:
+                file.write("{\n"+f'"name": "{self.level_name}",\n'+ '"blocks": [],\n'+f'"player_start_pos": {self.level_editor_set_spawn} ' +'\n}')
         self.json_blocks = []
         self.blocks = [] #create a block destroying function to destroy blocks
         return
@@ -280,6 +285,7 @@ class Main_Window(pyglet.window.Window):
         self.save_level_to_file()
         self.editing_level = False
         self.in_menu = False
+        self.level_editor_chosen_block_preview_image = object
         self.level_editor_batch = pyglet.graphics.Batch()
         self.gamestage = "menu"
     def create_level_editor_menu(self):
@@ -297,6 +303,7 @@ class Main_Window(pyglet.window.Window):
         self.level_editor_block_set_rotation = 0 #the rotation for when the block is placed
         self.block_images_pointer = 0
         self.level_editor_set_spawn = [0,0]
+        self.level_editor_chosen_block_preview_image = object
         self.level_name = ""
         self.in_menu = False
         self.editing_map = the_map
@@ -310,6 +317,7 @@ class Main_Window(pyglet.window.Window):
         self.editor_rotate_speed = 0.5
         self.load_block_images()
         self.editing_level = True
+        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
         pyglet.clock.schedule_interval_soft(self.process_keys_in_level_editor, 1/60.00)
         with open(the_map) as file:
             data = json.load(file)
@@ -346,12 +354,17 @@ class Main_Window(pyglet.window.Window):
                 else:
                     if self.in_menu:
                         self.level_editor_save_button.x = self.width//2
+                    try:
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+                    except Exception:
+                        pass
                     self.block_rotation_label.x = self.width//2
                     self.editor_crosshair.x = self.width//2
                     self.level_editor_pointer.x = self.width // 2
                     self.shuffle_block_images()
                     self.arrange_block_images(True)
                     self.arrange_block_images(False)
+                    
                     self.sync_blocks_to_position_for_level_editor(self.blocks)
             case "endgame":
                 self.backboard.x = self.width//2
@@ -412,7 +425,7 @@ class Main_Window(pyglet.window.Window):
         self.gamestage = "menu"
     def create_new_level(self, filename, level_name):
         with open(os.path.join(os.getcwd(),f"resources/maps/{filename}"), "w") as file:
-            file.write("{\n"+f'"name": "{level_name}",\n'+ '"blocks": [],\n'+'"player_start_pos": []\n}')
+            file.write("{\n"+f'"name": "{level_name}",\n'+ '"blocks": [],\n'+'"player_start_pos": [0,0]\n}')
             self.level_buttons = []
         return
     def sync_blocks_to_position_for_level_editor(self, blocks):
@@ -457,32 +470,19 @@ class Main_Window(pyglet.window.Window):
         self.level_select_batch = pyglet.graphics.Batch()
         self.endgame_batch = pyglet.graphics.Batch()
     def load_groups(self):
-        try:
-            self.m_bottom_order = pyglet.graphics.Group(order=-3)
-            self.m_middle_order = pyglet.graphics.Group(order=-2)
-            self.m_top_order = pyglet.graphics.Group(order=-1)
-            self.g_background_order = pyglet.graphics.Group(order=1)
-            self.g_block_order = pyglet.graphics.Group(order=2)
-            self.g_player_order = pyglet.graphics.Group(order=3)
-            self.g_gui_order = pyglet.graphics.Group(order=4)
-            self.ledit_bottom_order = pyglet.graphics.Group(order=5)
-            self.ledit_middle_order = pyglet.graphics.Group(order=6)
-            self.ledit_top_order = pyglet.graphics.Group(order=7)
-            self.ledit_gui_order = pyglet.graphics.Group(order=8)
-            self.ledit_menu_order = pyglet.graphics.Group(order=9)
-        except Exception:
-            self.m_bottom_order = pyglet.graphics.OrderedGroup(order=-3)
-            self.m_middle_order = pyglet.graphics.OrderedGroup(order=-2)
-            self.m_top_order = pyglet.graphics.OrderedGroup(order=-1)
-            self.g_background_order = pyglet.graphics.OrderedGroup(order=1)
-            self.g_block_order = pyglet.graphics.OrderedGroup(order=2)
-            self.g_player_order = pyglet.graphics.OrderedGroup(order=3)
-            self.g_gui_order = pyglet.graphics.OrderedGroup(order=4)
-            self.ledit_bottom_order = pyglet.graphics.OrderedGroup(order=5)
-            self.ledit_middle_order = pyglet.graphics.OrderedGroup(order=6)
-            self.ledit_top_order = pyglet.graphics.OrderedGroup(order=7)
-            self.ledit_gui_order = pyglet.graphics.OrderedGroup(order=8)
-            self.ledit_menu_order = pyglet.graphics.OrderedGroup(order=9)
+        self.m_bottom_order = pyglet.graphics.Group(order=-3)
+        self.m_middle_order = pyglet.graphics.Group(order=-2)
+        self.m_top_order = pyglet.graphics.Group(order=-1)
+        self.g_background_order = pyglet.graphics.Group(order=1)
+        self.g_block_order = pyglet.graphics.Group(order=2)
+        self.g_player_order = pyglet.graphics.Group(order=3)
+        self.g_gui_order = pyglet.graphics.Group(order=4)
+        self.ledit_bottom_order = pyglet.graphics.Group(order=5)
+        self.ledit_middle_order = pyglet.graphics.Group(order=6)
+        self.ledit_top_order = pyglet.graphics.Group(order=7)
+        self.ledit_block_preview_order = pyglet.graphics.Group(order=8)
+        self.ledit_gui_order = pyglet.graphics.Group(order=9)
+        self.ledit_menu_order = pyglet.graphics.Group(order=10)
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         match self.gamestage:
             case "level_select":
@@ -507,6 +507,9 @@ class Main_Window(pyglet.window.Window):
     def on_key_press(self, symbol, modifiers):
         self.keys_down.append(symbol)
         match self.gamestage:
+            case "level_select":
+                if symbol == pyglet.window.key.ESCAPE:
+                    self.gamestage = "menu"
             case "level_editor":
                 if self.level_create_dialog_open:
                     match str(symbol):
@@ -554,10 +557,12 @@ class Main_Window(pyglet.window.Window):
                         if not self.block_images_pointer > len(self.block_images) - 2:
                             self.block_images_pointer += 1
                         self.arrange_block_images(False)
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
                     if symbol == pyglet.window.key.Q:
                         if self.block_images_pointer > 0:
                             self.block_images_pointer -= 1
                         self.arrange_block_images(True)
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
                     if symbol == pyglet.window.key.SPACE:
                         if self.block_images_pointer == self.coin_image_index: 
                             print("skibi")
