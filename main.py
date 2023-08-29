@@ -208,10 +208,10 @@ class Main_Window(pyglet.window.Window):
                     i.sprite.x -= self.editor_move_speed * dt
             if i == pyglet.window.key.RIGHT:
                 self.level_editor_block_set_rotation += self.editor_rotate_speed
-                self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+                self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
             if i == pyglet.window.key.LEFT:
                 self.level_editor_block_set_rotation -= self.editor_rotate_speed
-                self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+                self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
             self.block_rotation_label.text = f"Block Rotation: {self.level_editor_block_set_rotation}"
     def shuffle_block_images(self, chosen_index=0):
         index = 0
@@ -332,7 +332,7 @@ class Main_Window(pyglet.window.Window):
         self.editor_rotate_speed = 0.5
         self.load_block_images()
         self.editing_level = True
-        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
         pyglet.clock.schedule_interval_soft(self.process_keys_in_level_editor, 1/60.00)
         with open(the_map) as file:
             data = json.load(file)
@@ -370,7 +370,7 @@ class Main_Window(pyglet.window.Window):
                     if self.in_menu:
                         self.level_editor_save_button.x = self.width//2
                     try:
-                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
                     except Exception:
                         pass
                     self.level_editor_editing_background_label.x = self.width//2
@@ -601,12 +601,12 @@ class Main_Window(pyglet.window.Window):
                         if not self.block_images_pointer > len(self.block_images) - 2:
                             self.block_images_pointer += 1
                         self.arrange_block_images(False)
-                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
                     if symbol == pyglet.window.key.Q:
                         if self.block_images_pointer > 0:
                             self.block_images_pointer -= 1
                         self.arrange_block_images(True)
-                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.ledit_block_preview_order)
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
                     if symbol == pyglet.window.key.SPACE:
                         if self.block_images_pointer == self.coin_image_index: 
                             self.blocks.append(Block(self.block_images_location[self.block_images_pointer], self.editor_true_pos[0] - 200, self.editor_true_pos[1] - 200, self.level_editor_block_set_rotation, self.level_editor_editing_background, True, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
