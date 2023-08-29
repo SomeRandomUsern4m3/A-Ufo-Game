@@ -304,7 +304,7 @@ class Main_Window(pyglet.window.Window):
         self.block_images = []
         self.block_images_location = []
         self.level_editor_block_set_rotation = 0 #the rotation for when the block is placed
-        self.level_editor_layer = 0
+        self.level_editor_layer = 3
         self.level_editor_editing_background = False
         self.block_images_pointer = 0
         self.level_editor_set_spawn = [0,0]
