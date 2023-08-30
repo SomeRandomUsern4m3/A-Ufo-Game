@@ -3,10 +3,10 @@ Its a fun game that I have been working on for some time now
 
 # Instructions:
 
-You need to click to make the spaceship jump
-The goal is to collect all coins in a level
-Dont crash or else you will die
-Press Esc to access the menus and or exit out of places
+You need to click to make the spaceship jump<br>
+The goal is to collect all coins in a level<br>
+Dont crash or else you will die<br>
+Press Esc to access the menus and or exit out of places<br>
 
 
 ## LEVEL EDITOR:
