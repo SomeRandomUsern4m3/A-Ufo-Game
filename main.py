@@ -227,7 +227,7 @@ class Main_Window(pyglet.window.Window):
                 i.x = self.level_editor_pointer.x + self.level_editor_pointer.width//2
                 self.first = False
             else:
-                i.x = self.block_images[index - 1].x + self.block_images[index - 1].width + (self.block_images[index - 1].width * 2)
+                i.x = self.block_images[index - 1].x + self.block_images[index - 1].width//2 + (self.block_images[index].width)
             index += 1
         index = 0
     def load_block_images(self):
