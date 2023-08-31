@@ -85,6 +85,7 @@ class Main_Window(pyglet.window.Window):
         if to_game:
             self.schedule_game_functions()
             self.gamestage = "game"
+        pyglet.gl.glClearColor(0,0,0,1)
     def check_if_player_at_edge(self, dt):
         """Checks if player is at edge and scrolls the screen"""
         if self.player.sprite.x < 200:
@@ -184,6 +185,7 @@ class Main_Window(pyglet.window.Window):
                 self.qwertyiop += 1
         return self.qwertyiop
     def load_sounds(self):
+        self.menu_loop = pyglet.media.load("./resources/sounds/loop1.mp3", streaming=True)
         self.jump_sound = pyglet.media.load("./resources/sounds/jump.wav", streaming=False)
         self.explosion_sound = pyglet.media.load("./resources/sounds/death_sound_effect.mp3", streaming=False)
         self.coin_collect_sound = pyglet.media.load("./resources/sounds/coin_collected.mp3", streaming=False)
@@ -283,7 +285,6 @@ class Main_Window(pyglet.window.Window):
         return
     def save_level_and_quit_to_menu(self):
         pyglet.clock.unschedule(self.process_keys_in_level_editor)
-        pyglet.gl.glClearColor(0,0,0,1)
         self.save_level_to_file()
         for i in self.level_buttons:
             i.destroy()
@@ -346,8 +347,8 @@ class Main_Window(pyglet.window.Window):
             if not data["player_start_pos"] == []:
                 self.level_editor_set_spawn = [data["player_start_pos"][0],data["player_start_pos"][1]]
     def resize_gui(self, dt):
-        #if not self.width == self.dwidth:
-            #no code goes here
+        if not self.width == self.dwidth:
+            print("yes")
         match self.gamestage:
             case "menu":
                 self.title_label.x = self.width // 2
@@ -393,8 +394,8 @@ class Main_Window(pyglet.window.Window):
                 self.splash_screen_title.x = self.width//2
                 self.splash_screen_credit.x = self.width//2
         self.dwidth = self.width
-        #if not self.height == self.dheight:
-            #no code goes here
+        if not self.height == self.dheight:
+            print("yes")
         match self.gamestage:
             case "menu":
                 self.title_label.y = self.height//2 + 200
@@ -442,6 +443,7 @@ class Main_Window(pyglet.window.Window):
                                 anchor_x='center', anchor_y='center')
     def remove_splash_screen(self, dt):
         pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
+        self.blocks = []
         self.gamestage = "menu"
     def create_new_level(self, filename, level_name):
         with open(os.path.join(os.getcwd(),f"resources/maps/{filename}"), "w") as file:
@@ -462,6 +464,7 @@ class Main_Window(pyglet.window.Window):
         self.gravity_amount = 500
         self.player_timer = 0 #a clock for how long the player takes
         self.paused = False
+        self.music_player = pyglet.media.Player()
         self.coin_image_index = 0
         pyglet.clock.schedule_interval_soft(self.resize_gui, 1/60.00)
         self.load_batches()
@@ -531,10 +534,13 @@ class Main_Window(pyglet.window.Window):
                 pass
     def on_key_press(self, symbol, modifiers):
         self.keys_down.append(symbol)
+        if modifiers == pyglet.window.key.MOD_WINDOWS:
+            self.keys_down = []
         match self.gamestage:
             case "level_select":
                 if symbol == pyglet.window.key.ESCAPE:
                     pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
+                    self.blocks = []
                     self.gamestage = "menu"
             case "level_editor":
                 if self.level_create_dialog_open:
@@ -557,6 +563,7 @@ class Main_Window(pyglet.window.Window):
                 if not self.editing_level:
                     if symbol == pyglet.window.key.ESCAPE:
                         pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
+                        self.blocks = []
                         self.gamestage = "menu"
                     if symbol == pyglet.window.key.TAB and not self.level_create_dialog_open:
                         self.level_create_dialog_open = True
@@ -675,6 +682,8 @@ class Main_Window(pyglet.window.Window):
                         self.player_timer = 0
                         self.coins_collected = 0
                         self.paused = False
+                        self.blocks = []
+                        pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                         self.gamestage = "menu"
                     return
                 if button == pyglet.window.mouse.LEFT:
@@ -689,6 +698,8 @@ class Main_Window(pyglet.window.Window):
                     self.player.gravity_enabled = True
             case "endgame":
                 if tools.separating_axis_theorem(tools.getRect(self.to_menu_button), tools.getRect(tools.center_image(pyglet.shapes.Rectangle(x,y, 5, 5, (0,0,0))))):
+                    pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
+                    self.blocks = []
                     self.gamestage = "menu"
             case _:
                 pass
