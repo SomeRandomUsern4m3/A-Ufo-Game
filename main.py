@@ -23,6 +23,7 @@ class Main_Window(pyglet.window.Window):
         self.quit_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/menu/quit_button.png")), self.play_button.x, self.level_editor_button.y - 210, batch=self.menu_batch, group=self.m_top_order)
     def make_level_selector(self):
         if self.gamestage == "level_select":
+            pyglet.gl.glClearColor(0.00, 0.410, 0.0820,1)
             self.level_selector_help_text = pyglet.text.Label('Drag your mouse around to explore then click on the text to play',
                             font_name='Arial',
                             font_size=20,
@@ -290,6 +291,7 @@ class Main_Window(pyglet.window.Window):
         self.in_menu = False
         self.level_editor_chosen_block_preview_image = object
         self.level_editor_batch = pyglet.graphics.Batch()
+        pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
         self.gamestage = "menu"
     def create_level_editor_menu(self):
         self.level_editor_save_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/level_editor_gui/save_button.png")), self.width//2, self.height//2, batch=no_draw_batch, group=self.ledit_menu_order)
@@ -439,7 +441,7 @@ class Main_Window(pyglet.window.Window):
                                 x=self.width//2, y=self.height//2,
                                 anchor_x='center', anchor_y='center')
     def remove_splash_screen(self, dt):
-        pyglet.gl.glClearColor(0,0,0,1)
+        pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
         self.gamestage = "menu"
     def create_new_level(self, filename, level_name):
         with open(os.path.join(os.getcwd(),f"resources/maps/{filename}"), "w") as file:
@@ -532,6 +534,7 @@ class Main_Window(pyglet.window.Window):
         match self.gamestage:
             case "level_select":
                 if symbol == pyglet.window.key.ESCAPE:
+                    pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                     self.gamestage = "menu"
             case "level_editor":
                 if self.level_create_dialog_open:
@@ -553,7 +556,7 @@ class Main_Window(pyglet.window.Window):
                                     self.file_name_text_input.value += chr(symbol).upper()
                 if not self.editing_level:
                     if symbol == pyglet.window.key.ESCAPE:
-                        pyglet.gl.glClearColor(0,0,0,1)
+                        pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                         self.gamestage = "menu"
                     if symbol == pyglet.window.key.TAB and not self.level_create_dialog_open:
                         self.level_create_dialog_open = True
