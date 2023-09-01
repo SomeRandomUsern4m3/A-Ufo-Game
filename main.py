@@ -59,6 +59,7 @@ class Main_Window(pyglet.window.Window):
         """
         Pass in the map location
         """
+        self.level_buttons = []
         self.blocks = []
         with open(map) as map_data:
             print(map)
@@ -282,6 +283,7 @@ class Main_Window(pyglet.window.Window):
         for i in self.blocks:
             i.destroy()
         self.blocks = [] #create a block destroying function to destroy blocks
+        self.level_buttons = []
         return
     def save_level_and_quit_to_menu(self):
         pyglet.clock.unschedule(self.process_keys_in_level_editor)
@@ -454,6 +456,13 @@ class Main_Window(pyglet.window.Window):
         for i in blocks:
             i.sprite.x = self.width//2 + (i.true_x - self.editor_true_pos[0]) + 200
             i.sprite.y = self.height//2 + (i.true_y - self.editor_true_pos[1]) + 200
+    def music_looper(self, dt):
+        if self.gamestage == "menu" and not self.playing_music:
+            self.music_player.play()
+            self.playing_music = True
+        elif not self.gamestage == "menu" and self.playing_music:
+            self.music_player.pause()
+            self.playing_music = False
     def initiate_variables(self):
         self.start_splash_screen()
         self.gamestage = "" #the game stages are menu , level_editor, level_select , game , endgame any other value is illegal
@@ -465,12 +474,16 @@ class Main_Window(pyglet.window.Window):
         self.player_timer = 0 #a clock for how long the player takes
         self.paused = False
         self.music_player = pyglet.media.Player()
+        self.playing_music = False
         self.coin_image_index = 0
         pyglet.clock.schedule_interval_soft(self.resize_gui, 1/60.00)
         self.load_batches()
         self.load_groups()
         self.layers = [self.g_low_background_order, self.g_medium_background_order, self.g_high_background_order, self.g_low_above_player_order, self.g_medium_above_player_order, self.g_high_above_player_order]
         self.load_sounds()
+        self.music_player.queue(self.menu_loop)
+        self.music_player.loop = True
+        pyglet.clock.schedule_interval_soft(self.music_looper, 1/30.00)
         self.make_pause_menu()
         self.make_menu()
         pyglet.clock.schedule_once(self.remove_splash_screen, delay=3)
@@ -541,6 +554,7 @@ class Main_Window(pyglet.window.Window):
                 if symbol == pyglet.window.key.ESCAPE:
                     pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                     self.blocks = []
+                    self.level_buttons = []
                     self.gamestage = "menu"
             case "level_editor":
                 if self.level_create_dialog_open:
@@ -564,6 +578,7 @@ class Main_Window(pyglet.window.Window):
                     if symbol == pyglet.window.key.ESCAPE:
                         pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                         self.blocks = []
+                        self.level_buttons = []
                         self.gamestage = "menu"
                     if symbol == pyglet.window.key.TAB and not self.level_create_dialog_open:
                         self.level_create_dialog_open = True
@@ -683,6 +698,7 @@ class Main_Window(pyglet.window.Window):
                         self.coins_collected = 0
                         self.paused = False
                         self.blocks = []
+                        self.level_buttons = []
                         pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                         self.gamestage = "menu"
                     return
@@ -700,6 +716,7 @@ class Main_Window(pyglet.window.Window):
                 if tools.separating_axis_theorem(tools.getRect(self.to_menu_button), tools.getRect(tools.center_image(pyglet.shapes.Rectangle(x,y, 5, 5, (0,0,0))))):
                     pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
                     self.blocks = []
+                    self.level_buttons = []
                     self.gamestage = "menu"
             case _:
                 pass
