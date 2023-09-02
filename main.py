@@ -124,6 +124,9 @@ class Main_Window(pyglet.window.Window):
                           x=self.to_menu_button.x, y=self.to_menu_button.y,
                           anchor_x='center', anchor_y='center', batch=self.endgame_batch)
     def add_coin_to_player(self, block):
+        self.tmp_coin_block = block
+        self.tmp_coin_block.sprite.batch = no_draw_batch
+        self.coins_collected_array.append(block)
         block.batch = None
         block.group = None
         self.blocks.remove(block)
@@ -145,9 +148,16 @@ class Main_Window(pyglet.window.Window):
                 self.explosion_sound.play()
                 for i in range(0,360,5):
                     self.particles_active.append(Particle(self.player.sprite.x, self.player.sprite.y, i, self.game_batch, self.g_particle_order, self.particles_active, True))
+                for i in self.coins_collected_array:
+                    i.sprite.batch = self.game_batch
+                    self.blocks.append(i)
+                self.coins_collected = 0
+                self.coin_text.text = f"{0} / {self.coins_in_level}"
+                self.coins_collected_array = []
                 self.player.respawn(self.width, self.height)
             elif self.player_collision[0] == "coin":
                 self.coin_collect_sound.play()
+                print(self.player_collision[1])
                 self.add_coin_to_player(self.player_collision[1])
         if self.player.gravity_enabled:
             self.player.y_velocity -= self.gravity_amount * dt
@@ -161,6 +171,7 @@ class Main_Window(pyglet.window.Window):
         return []
     def schedule_game_functions(self):
         self.coins_collected = 0
+        self.coins_collected_array = []
         self.coins_in_level = self.scan_for_coins_in_level()
         self.coin_text = pyglet.text.Label(f'{self.coins_collected} / {self.coins_in_level}',
                     font_name='Arial',
