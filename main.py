@@ -4,6 +4,7 @@ import json
 import glob
 import os
 import math
+import random
 no_draw_batch = pyglet.graphics.Batch()
 class Main_Window(pyglet.window.Window):
     def __init__(self, w,h,c):
@@ -142,6 +143,8 @@ class Main_Window(pyglet.window.Window):
         if self.player_collision:
             if self.player_collision[0] == "collision":
                 self.explosion_sound.play()
+                for i in range(0,360,5):
+                    self.particles_active.append(Particle(self.player.sprite.x, self.player.sprite.y, i, self.game_batch, self.g_particle_order, self.particles_active, True))
                 self.player.respawn(self.width, self.height)
             elif self.player_collision[0] == "coin":
                 self.coin_collect_sound.play()
@@ -350,7 +353,13 @@ class Main_Window(pyglet.window.Window):
                 self.level_editor_set_spawn = [data["player_start_pos"][0],data["player_start_pos"][1]]
     def resize_gui(self, dt):
         if not self.width == self.dwidth:
-            print("yes")
+            #put functions that only need to be called when on that stage here
+            match self.gamestage:
+                case "game":
+                    self.player.sprite.x = self.width//2
+                    self.player.sync_blocks_to_position(self.blocks)
+                case _:
+                    pass
         match self.gamestage:
             case "menu":
                 self.title_label.x = self.width // 2
@@ -397,7 +406,12 @@ class Main_Window(pyglet.window.Window):
                 self.splash_screen_credit.x = self.width//2
         self.dwidth = self.width
         if not self.height == self.dheight:
-            print("yes")
+            match self.gamestage:
+                case "game":
+                    self.player.sprite.y = self.height//2
+                    self.player.sync_blocks_to_position(self.blocks)
+                case _:
+                    pass
         match self.gamestage:
             case "menu":
                 self.title_label.y = self.height//2 + 200
@@ -463,6 +477,10 @@ class Main_Window(pyglet.window.Window):
         elif not self.gamestage == "menu" and self.playing_music:
             self.music_player.pause()
             self.playing_music = False
+    def check_for_dead_particles(self, dt):
+        for i in self.particles_active:
+            if i.dead:
+                self.particles_active.remove(i)
     def initiate_variables(self):
         self.start_splash_screen()
         self.gamestage = "" #the game stages are menu , level_editor, level_select , game , endgame any other value is illegal
@@ -470,6 +488,8 @@ class Main_Window(pyglet.window.Window):
         self.editing_level = False
         self.keys_down = []
         self.blocks = []
+        self.particles_active = []
+        pyglet.clock.schedule_interval_soft(self.check_for_dead_particles, 1/30.00)
         self.gravity_amount = 500
         self.player_timer = 0 #a clock for how long the player takes
         self.paused = False
@@ -517,13 +537,14 @@ class Main_Window(pyglet.window.Window):
         self.g_low_above_player_order = pyglet.graphics.Group(order=5)
         self.g_medium_above_player_order = pyglet.graphics.Group(order=6)
         self.g_high_above_player_order = pyglet.graphics.Group(order=7)
-        self.g_gui_order = pyglet.graphics.Group(order=8)
-        self.ledit_bottom_order = pyglet.graphics.Group(order=9)
-        self.ledit_middle_order = pyglet.graphics.Group(order=10)
-        self.ledit_top_order = pyglet.graphics.Group(order=11)
-        self.ledit_block_preview_order = pyglet.graphics.Group(order=12)
-        self.ledit_gui_order = pyglet.graphics.Group(order=13)
-        self.ledit_menu_order = pyglet.graphics.Group(order=14)
+        self.g_particle_order = pyglet.graphics.Group(order=8)
+        self.g_gui_order = pyglet.graphics.Group(order=9)
+        self.ledit_bottom_order = pyglet.graphics.Group(order=10)
+        self.ledit_middle_order = pyglet.graphics.Group(order=11)
+        self.ledit_top_order = pyglet.graphics.Group(order=12)
+        self.ledit_block_preview_order = pyglet.graphics.Group(order=13)
+        self.ledit_gui_order = pyglet.graphics.Group(order=14)
+        self.ledit_menu_order = pyglet.graphics.Group(order=15)
     def on_mouse_drag(self, x, y, dx, dy, buttons, modifiers):
         match self.gamestage:
             case "level_select":
@@ -656,7 +677,13 @@ class Main_Window(pyglet.window.Window):
             case "game":
                 if self.paused:
                     return
-                self.player.sprite.rotation = math.degrees(math.atan2(x - self.player.sprite.x, y - self.player.sprite.y)) + 180
+                target_rotation = math.degrees(math.atan2(x - self.player.sprite.x, y - self.player.sprite.y)) + 180
+                if target_rotation < 360 - self.player.max_angle and target_rotation > 180:
+                    self.player.sprite.rotation = 360 - self.player.max_angle
+                elif target_rotation > self.player.max_angle and target_rotation < 180:
+                    self.player.sprite.rotation = self.player.max_angle
+                else:
+                    self.player.sprite.rotation = target_rotation
             case _:
                 pass
     def on_mouse_press(self, x, y, button, modifiers):
@@ -710,6 +737,8 @@ class Main_Window(pyglet.window.Window):
                     bullet_move_y = self.player.jump_power * math.sin( math.radians(-self.player.sprite.rotation + 90))
                     self.player.sprite.y += bullet_move_y
                     self.player.sprite.x += bullet_move_x
+                    for i in range(0, 20, 1):
+                        self.particles_active.append(Particle(self.player.sprite.x, self.player.sprite.y, random.randrange(round(self.player.sprite.rotation - 15), round(self.player.sprite.rotation + 15)), self.game_batch, self.g_particle_order, self.particles_active))
                     self.jump_sound.play()
                     self.player.gravity_enabled = True
             case "endgame":
@@ -766,6 +795,7 @@ class Player(object):
         self.true_y = truey#the true y position
         self.map_blocks = map_blocks
         self.gravity_enabled = True
+        self.max_angle = 50
         self.jump_power = 25
         self.x_velocity = 0
         self.y_velocity = 0
@@ -782,6 +812,26 @@ class Player(object):
         for i in blocks:
             i.sprite.x = self.sprite.x + (i.true_x - self.true_x) + 200
             i.sprite.y = self.sprite.y + (i.true_y - self.true_y) + 200
+class Particle(object):
+    def __init__(self, x,y,rotation,batch,group,particle_list, explosion=False):
+        """inverts the rotation automatically"""
+        if explosion:
+            self.sprite = tools.center_image(pyglet.shapes.Rectangle(x,y, 5,5, (random.randrange(230,255), random.randrange(76,110), random.randrange(0,48)), batch, group))
+        else:
+            self.sprite = tools.center_image(pyglet.shapes.Rectangle(x,y, 5,5, (random.randrange(245,255), random.randrange(245,255), random.randrange(245,255)), batch, group))
+        self.speed = 15
+        self.dead = False
+        self.rotation = rotation
+        self.particle_list = particle_list
+        pyglet.clock.schedule_interval_soft(self.move_particle, 1/60.00)
+        pyglet.clock.schedule_once(self.destroy_object, delay=1)
+    def destroy_object(self,dt):
+        pyglet.clock.unschedule(self.move_particle)
+        self.sprite.batch = None
+        self.dead = True
+    def move_particle(self,dt):
+        self.sprite.x -= self.speed * math.cos( math.radians(-self.rotation + 90))
+        self.sprite.y -= self.speed * math.sin( math.radians(-self.rotation + 90))
 class Block(object):
     def __init__(self,image,x,y,rotation, isBackground, isCoin, batch, group, layernumber=0):
         try:
