@@ -415,6 +415,7 @@ class Main_Window(pyglet.window.Window):
             case _:
                 self.splash_screen_title.x = self.width//2
                 self.splash_screen_credit.x = self.width//2
+                self.splash_screen_credit1.x = self.width//2
         self.dwidth = self.width
         if not self.height == self.dheight:
             match self.gamestage:
@@ -454,7 +455,8 @@ class Main_Window(pyglet.window.Window):
                 self.to_menu_label.y = self.to_menu_button.y
             case _:
                 self.splash_screen_title.y = self.height//2 + 300
-                self.splash_screen_credit.y = self.height//2
+                self.splash_screen_credit.y = self.height//2 - 100
+                self.splash_screen_credit1.y = self.height//2
         self.dheight = self.height
     def start_splash_screen(self):
         pyglet.gl.glClearColor(0.00,0.80,0.27, 1)
@@ -463,10 +465,15 @@ class Main_Window(pyglet.window.Window):
                                 font_size=96,
                                 x=self.width//2, y=self.height//2 + 300,
                                 anchor_x='center', anchor_y='center')
+        self.splash_screen_credit1 = pyglet.text.Label('Assets and ideas made by Renato',
+                                font_name='Arial', bold=True,
+                                font_size=40,
+                                x=self.width//2, y=self.height//2,
+                                anchor_x='center', anchor_y='center')
         self.splash_screen_credit = pyglet.text.Label('Sounds from pixaby.com and by Pixaby',
                                 font_name='Arial', bold=True,
                                 font_size=24,
-                                x=self.width//2, y=self.height//2,
+                                x=self.width//2, y=self.height//2 - 100,
                                 anchor_x='center', anchor_y='center')
     def remove_splash_screen(self, dt):
         pyglet.gl.glClearColor(0.240, 0.683, 1.00,1)
@@ -778,6 +785,7 @@ class Main_Window(pyglet.window.Window):
                 self.endgame_batch.draw()
             case _:
                 self.splash_screen_title.draw()
+                self.splash_screen_credit1.draw()
                 self.splash_screen_credit.draw()
 class LevelCreateDialog(pyglet.gui.TextEntry):
     def __init__(self, text, x, y, width, color=(255,255,255,255), text_color=(0,0,0,255), caret_color=(255,255,255,255), batch=None, group=None):
