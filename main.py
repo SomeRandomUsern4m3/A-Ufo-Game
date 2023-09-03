@@ -386,8 +386,11 @@ class Main_Window(pyglet.window.Window):
                                     font_size=36,
                                     x=self.width //2, y=self.height - 10,
                                     anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order)
-        self.level_editor_menu_tips = [pyglet.text.Label('Use the scroll wheel to change what block you are using, use left click to place blocks, drag with right click to move around', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.height,anchor_x='center', anchor_y='top', batch=self.level_editor_batch, group=self.ledit_gui_order)]
-        self.level_editor_menu_tips.append(pyglet.text.Label('Use the Up and Down arrow to change the layer you are editing on', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[0].y - 20,anchor_x='center', anchor_y='top', batch=self.level_editor_batch, group=self.ledit_gui_order))
+        self.level_editor_menu_tips = [pyglet.text.Label('Use the scroll wheel to change what block you are using, use left click to place blocks, drag with right click to move around', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.height,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order)]
+        self.level_editor_menu_tips.append(pyglet.text.Label('Use the Up and Down arrow to change the layer you are editing on', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[len(self.level_editor_menu_tips) - 1].y - 20,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order))
+        self.level_editor_menu_tips.append(pyglet.text.Label('Press c to switch to editing background and back, Press Y to set the level spawn point', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[len(self.level_editor_menu_tips) - 1].y - 20,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order))
+        self.level_editor_menu_tips.append(pyglet.text.Label('Use the left and right arrows to rotate the block you are placing, Press G to reset rotation', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[len(self.level_editor_menu_tips) - 1].y - 20,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order))
+        self.level_editor_menu_tips.append(pyglet.text.Label('Press F to delete blocks', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[len(self.level_editor_menu_tips) - 1].y - 20,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order))
         self.editor_move_speed = 100
         self.editor_rotate_speed = 0.5
         self.load_block_images()
@@ -442,6 +445,8 @@ class Main_Window(pyglet.window.Window):
                         self.level_editor_save_button.x = self.width//2
                     except Exception:
                         pass
+                    for i in self.level_editor_menu_tips:
+                        i.x = self.width//2
                     self.level_editor_editing_background_label.x = self.width//2
                     self.level_editor_grid_size_change_button.x = self.width - self.level_editor_grid_size_change_button.width
                     self.level_editor_grid_size_button_text.x = self.level_editor_grid_size_change_button.x
@@ -484,6 +489,7 @@ class Main_Window(pyglet.window.Window):
         except Exception:
             pass
         try:
+            #level selector
                 self.level_selector_help_text.y += self.height - self.dheight
                 for i in self.level_buttons:
                     i.level_name_text.y += self.height - self.dheight
@@ -495,10 +501,13 @@ class Main_Window(pyglet.window.Window):
         except Exception:
             pass
         try:
+            #level editor
                 try:
                     self.level_selector_help_text.y += self.height - self.dheight
                 except Exception:
                     self.level_editor_save_button.y = self.height//2
+                    for i in self.level_editor_menu_tips:
+                        self.level_editor_menu_tips[self.level_editor_menu_tips.index(i) - 1].y - 20
                     self.level_editor_editing_background_label.y = self.height - 10
                     self.level_editor_layer_editing_on_label.y = self.height - 10
                     self.block_rotation_label.y = self.height - 10
@@ -624,6 +633,20 @@ class Main_Window(pyglet.window.Window):
         self.ledit_block_preview_order = pyglet.graphics.Group(order=14)
         self.ledit_gui_order = pyglet.graphics.Group(order=15)
         self.ledit_menu_order = pyglet.graphics.Group(order=16)
+    def on_mouse_scroll(self, x,y, scroll_x, scroll_y):
+        if scroll_y > 0:
+            #right
+            if not self.block_images_pointer > len(self.block_images) - 2:
+                self.block_images_pointer += 1
+            self.arrange_block_images(False)
+            self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.level_editor_chosen_block_preview_image.sprite.x, self.level_editor_chosen_block_preview_image.sprite.y,0,0, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
+        else:
+            #left
+            if self.block_images_pointer > 0:
+                self.block_images_pointer -= 1
+            self.arrange_block_images(True)
+            self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.level_editor_chosen_block_preview_image.sprite.x, self.level_editor_chosen_block_preview_image.sprite.y,0,0, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
+
     def on_mouse_drag(self, x, y, dx, dy, button, modifiers):
         match self.gamestage:
             case "level_select":
@@ -743,8 +766,26 @@ class Main_Window(pyglet.window.Window):
                         if not self.in_menu:
                             self.in_menu = True
                             self.level_editor_save_button.batch = self.level_editor_batch
+                            self.level_editor_layer_editing_on_label.batch = no_draw_batch
+                            self.block_rotation_label.batch = no_draw_batch
+                            self.level_editor_pointer_image.batch = no_draw_batch
+                            self.level_editor_grid_size_change_button.batch = no_draw_batch
+                            self.level_editor_grid_size_button_text.batch = no_draw_batch
+                            for i in self.block_images:
+                                i.batch = no_draw_batch
+                            for i in self.level_editor_menu_tips:
+                                i.batch = self.level_editor_batch
                         else:
                             self.in_menu = False
+                            self.level_editor_layer_editing_on_label.batch = self.level_editor_batch
+                            self.block_rotation_label.batch = self.level_editor_batch
+                            self.level_editor_pointer_image.batch = self.level_editor_batch
+                            self.level_editor_grid_size_change_button.batch = self.level_editor_batch
+                            self.level_editor_grid_size_button_text.batch = self.level_editor_batch
+                            for i in self.block_images:
+                                i.batch = self.level_editor_batch
+                            for i in self.level_editor_menu_tips:
+                                i.batch = no_draw_batch
                             self.level_editor_save_button.batch = no_draw_batch
                     if symbol == pyglet.window.key.F:
                         for i in self.blocks:
