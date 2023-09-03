@@ -764,10 +764,8 @@ class Main_Window(pyglet.window.Window):
                 pass
     def on_resize(self, width, height):
         self.resize_gui(1)
-        try:
+        if self.editing_level and self.gamestage == "level_editor":
             self.edit_level_loader(self.editing_map) #bookmark1
-        except Exception:
-            pass
         pyglet.gl.glViewport(0, 0, *self.get_framebuffer_size())
         self.projection = pyglet.math.Mat4.orthogonal_projection(0, width, 0, height, -255, 255)
     def on_key_release(self, symbol, modifier):
