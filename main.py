@@ -386,6 +386,8 @@ class Main_Window(pyglet.window.Window):
                                     font_size=36,
                                     x=self.width //2, y=self.height - 10,
                                     anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order)
+        self.level_editor_menu_tips = [pyglet.text.Label('Use the scroll wheel to change what block you are using, use left click to place blocks, drag with right click to move around', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.height,anchor_x='center', anchor_y='top', batch=self.level_editor_batch, group=self.ledit_gui_order)]
+        self.level_editor_menu_tips.append(pyglet.text.Label('Use the Up and Down arrow to change the layer you are editing on', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[0].y - 20,anchor_x='center', anchor_y='top', batch=self.level_editor_batch, group=self.ledit_gui_order))
         self.editor_move_speed = 100
         self.editor_rotate_speed = 0.5
         self.load_block_images()
