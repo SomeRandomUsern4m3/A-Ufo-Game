@@ -1,8 +1,24 @@
 import math
-def center_image(image):
+def center_image(image, anchor_x="center", anchor_y="center"):
     timage = image #copy of the image
-    timage.anchor_x = timage.width//2
-    timage.anchor_y = timage.height//2
+    match anchor_x:
+        case "left":
+            print("not err")
+        case "center":
+            timage.anchor_x = timage.width//2
+        case "right":
+            timage.anchor_x = timage.width
+        case _:
+            timage.anchor_x = timage.width//2
+    match anchor_y:
+        case "bottom":
+            print("not err")
+        case "center":
+            timage.anchor_y = timage.height//2
+        case "top":
+            timage.anchor_y = timage.height
+        case _:
+            timage.anchor_y = timage.height//2
     return timage
 def CheckAABBCollision(one, two):
     collisionX = one.x + one.width >= two.x and two.x + two.width >= one.x

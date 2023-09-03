@@ -313,7 +313,8 @@ class Main_Window(pyglet.window.Window):
     def create_level_editor_menu(self):
         self.level_editor_save_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/level_editor_gui/save_button.png")), self.width//2, self.height//2, batch=no_draw_batch, group=self.ledit_menu_order)
     def calculate_grid_lines(self):
-        self.level_editor_grid_blocks = []
+        self.level_editor_grid_blocks_x = []
+        self.level_editor_grid_blocks_y = []
         try:
             self.width//self.level_editor_grid_sizes[self.level_editor_grid_size_pointer]#check if freehanding or not
             line_index = round(self.width // self.level_editor_grid_sizes[self.level_editor_grid_size_pointer])
@@ -339,6 +340,8 @@ class Main_Window(pyglet.window.Window):
         self.level_editor_pointer_image = pyglet.image.load("./resources/level_editor_gui/pointer.png")
         self.level_editor_pointer_image.anchor_y = self.level_editor_pointer_image.width // 2
         self.level_editor_grid_size_change_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/level_editor_gui/grid_size_button.png")), self.width - 32, 200, batch=self.level_editor_batch, group=self.ledit_gui_order)
+        self.second_magic_number_x = 0
+        self.second_magic_number_y = 0
         self.level_editor_grid_blocks_x = []
         self.level_editor_grid_blocks_y = []
         self.level_editor_grid_sizes = [64, 32, 16, 0]
@@ -425,12 +428,12 @@ class Main_Window(pyglet.window.Window):
         except Exception:
             pass
         try:
-                if not self.editing_level:
+                try:
                     self.level_selector_help_text.x += self.width - self.dwidth
                     for i in self.level_buttons:
                         i.level_name_text.x += self.width - self.dwidth
                         i.sprite.x += self.width - self.dwidth
-                else:
+                except Exception:
                     if self.in_menu:
                         self.level_editor_save_button.x = self.width//2
                     self.level_editor_editing_background_label.x = self.width//2
@@ -486,11 +489,10 @@ class Main_Window(pyglet.window.Window):
         except Exception:
             pass
         try:
-                if not self.editing_level:
+                try:
                     self.level_selector_help_text.y += self.height - self.dheight
-                else:
-                    if self.in_menu:
-                        self.level_editor_save_button.y = self.height//2
+                except Exception:
+                    self.level_editor_save_button.y = self.height//2
                     self.level_editor_editing_background_label.y = self.height - 10
                     self.level_editor_layer_editing_on_label.y = self.height - 10
                     self.block_rotation_label.y = self.height - 10
@@ -638,22 +640,26 @@ class Main_Window(pyglet.window.Window):
                 else:
                     if button == pyglet.window.mouse.RIGHT:
                         if not self.level_editor_is_freehanding:
-                            self.editor_true_pos[0] += -self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
-                            self.editor_true_pos[1] += -self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
+                            self.editor_true_pos[0] += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
+                            self.editor_true_pos[1] += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
+                            self.second_magic_number_x -= self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
+                            self.second_magic_number_y -= self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
                         else:
-                            self.editor_true_pos[0] += -dx
-                            self.editor_true_pos[1] += -dy
+                            self.editor_true_pos[0] += dx
+                            self.editor_true_pos[1] += dy
+                            self.second_magic_number_x -= dx
+                            self.second_magic_number_y -= dy
                         self.level_editor_chosen_block_preview_image.sprite.x = self.roundedmousex
                         self.level_editor_chosen_block_preview_image.sprite.y = self.roundedmousey
                         self.editor_crosshair.x = self.roundedmousex
                         self.editor_crosshair.y = self.roundedmousey
                         for i in self.blocks:
                             if not self.level_editor_is_freehanding:
-                                i.sprite.x += -self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
-                                i.sprite.y += -self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
+                                i.sprite.x += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
+                                i.sprite.y += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
                             else:
-                                self.editor_true_pos[0] += -dx
-                                self.editor_true_pos[1] += -dy
+                                i.sprite.x += dx
+                                i.sprite.y += dy
 
             case _:
                 pass
@@ -758,6 +764,12 @@ class Main_Window(pyglet.window.Window):
                 pass
     def on_resize(self, width, height):
         self.resize_gui(1)
+        try:
+            self.gamestage = ""
+            self.edit_level_loader(self.editing_map) #bookmark1
+            self.gamestage = "level_editor"
+        except Exception:
+            pass
         pyglet.gl.glViewport(0, 0, *self.get_framebuffer_size())
         self.projection = pyglet.math.Mat4.orthogonal_projection(0, width, 0, height, -255, 255)
     def on_key_release(self, symbol, modifier):
@@ -849,10 +861,14 @@ class Main_Window(pyglet.window.Window):
                             self.level_editor_grid_size_button_text.text = f"{self.level_editor_grid_sizes[self.level_editor_grid_size_pointer]}"
                             return
                     if button == pyglet.window.mouse.LEFT:
+                        #if self.block_images_pointer == self.coin_image_index: 
+                         #   self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (((self.roundedmousex - self.width //2) + self.editor_true_pos[0]) + (self.width - self.magic_number_x)//2) - self.second_magic_number_x, (((self.roundedmousey - self.height//2) + self.editor_true_pos[1]) + (self.height - self.magic_number_y)//2) - self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, True, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
+                        #else:
+                        #    self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (((self.roundedmousex - self.width //2) + self.editor_true_pos[0]) + (self.width - self.magic_number_x)//2) - self.second_magic_number_x, (((self.roundedmousey - self.height//2) + self.editor_true_pos[1]) + (self.height - self.magic_number_y)//2) - self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, False, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
                         if self.block_images_pointer == self.coin_image_index: 
-                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], ((self.roundedmousex - self.width //2) + self.editor_true_pos[0]) + (self.width - self.magic_number_x)//2, ((self.roundedmousey - self.height//2) + self.editor_true_pos[1]) + (self.height - self.magic_number_y)//2 , self.level_editor_block_set_rotation, self.level_editor_editing_background, True, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
+                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (self.editor_true_pos[0] + (self.editor_crosshair.x - self.width//2)) + self.second_magic_number_x, (self.editor_true_pos[1] + (self.editor_crosshair.y - self.height//2)) + self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, True, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
                         else:
-                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], ((self.roundedmousex - self.width //2) + self.editor_true_pos[0]) + (self.width - self.magic_number_x)//2, ((self.roundedmousey - self.height//2) + self.editor_true_pos[1]) + (self.height - self.magic_number_y)//2, self.level_editor_block_set_rotation, self.level_editor_editing_background, False, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
+                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (self.editor_true_pos[0] + (self.editor_crosshair.x - self.width//2)) + self.second_magic_number_x, (self.editor_true_pos[1] + (self.editor_crosshair.y - self.height//2)) + self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, False, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
             case "game":
                 if self.paused:
                     if tools.separating_axis_theorem(tools.getRect(self.quit_button2), tools.getRect(tools.center_image(pyglet.shapes.Rectangle(x,y, 5, 5, (0,0,0))))):
@@ -971,6 +987,7 @@ class Particle(object):
         self.sprite.y -= self.speed * math.sin( math.radians(-self.rotation + 90))
 class Block(object):
     def __init__(self,image,x,y,rotation, isBackground, isCoin, batch, group, layernumber=0):
+        print(x, y)
         try:
             self.sprite = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load(image)), x,y, batch=batch, group=group)
         except TypeError:
