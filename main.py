@@ -765,9 +765,7 @@ class Main_Window(pyglet.window.Window):
     def on_resize(self, width, height):
         self.resize_gui(1)
         try:
-            self.gamestage = ""
             self.edit_level_loader(self.editing_map) #bookmark1
-            self.gamestage = "level_editor"
         except Exception:
             pass
         pyglet.gl.glViewport(0, 0, *self.get_framebuffer_size())
