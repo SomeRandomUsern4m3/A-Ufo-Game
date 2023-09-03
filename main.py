@@ -77,12 +77,13 @@ class Main_Window(pyglet.window.Window):
                 else:
                     self.isBackground = False
                 if to_game:
-                    temporary_block = Block(i[0], i[1], i[2], i[3], self.isBackground, self.isCoin, self.game_batch, self.layers[i[6]], i[6]) #this is the block we want to append to the blocks list
+                    temporary_block = Block(i[0], i[1], i[2],i[1], i[2], i[3], self.isBackground, self.isCoin, self.game_batch, self.layers[i[6]], i[6]) #this is the block we want to append to the blocks list
                 else:
-                    temporary_block = Block(i[0], i[1], i[2], i[3], self.isBackground, self.isCoin, self.level_editor_batch, self.layers[i[6]], i[6])
+                    temporary_block = Block(i[0], i[1], i[2], i[1], i[2],i[3], self.isBackground, self.isCoin, self.level_editor_batch, self.layers[i[6]], i[6])
                 self.blocks.append(temporary_block)
             if to_game:
                 self.player = Player(map_json["player_start_pos"][0],map_json["player_start_pos"][1],self.width, self.height, self.blocks, self.game_batch, self.g_player_order)
+        print(self.blocks)
         if to_game:
             self.schedule_game_functions()
             self.gamestage = "game"
@@ -335,6 +336,7 @@ class Main_Window(pyglet.window.Window):
         self.level_editor_batch = pyglet.graphics.Batch()
         pyglet.gl.glClearColor(0,0,0,1)
         self.create_level_editor_menu()
+        self.zero_point = pyglet.shapes.Rectangle(0,0,1,1,(0,0,0))
         self.editor_crosshair = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/level_editor_gui/crosshair.png")), self.width//2, self.height//2, batch=self.level_editor_batch, group=self.ledit_gui_order)
         self.editor_true_pos = [self.width//2,self.height//2] #the true position of where the center of the level editor is, this will be used to place blocks in the correct place
         self.level_editor_pointer_image = pyglet.image.load("./resources/level_editor_gui/pointer.png")
@@ -388,7 +390,7 @@ class Main_Window(pyglet.window.Window):
         self.editor_rotate_speed = 0.5
         self.load_block_images()
         self.editing_level = True
-        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
+        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2,0,0, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
         pyglet.clock.schedule_interval_soft(self.process_keys_in_level_editor, 1/60.00)
         with open(the_map) as file:
             data = json.load(file)
@@ -434,8 +436,10 @@ class Main_Window(pyglet.window.Window):
                         i.level_name_text.x += self.width - self.dwidth
                         i.sprite.x += self.width - self.dwidth
                 except Exception:
-                    if self.in_menu:
+                    try:
                         self.level_editor_save_button.x = self.width//2
+                    except Exception:
+                        pass
                     self.level_editor_editing_background_label.x = self.width//2
                     self.level_editor_grid_size_change_button.x = self.width - self.level_editor_grid_size_change_button.width
                     self.level_editor_grid_size_button_text.x = self.level_editor_grid_size_change_button.x
@@ -644,11 +648,15 @@ class Main_Window(pyglet.window.Window):
                             self.editor_true_pos[1] += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
                             self.second_magic_number_x -= self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
                             self.second_magic_number_y -= self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
+                            self.zero_point.x += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dx / 10)
+                            self.zero_point.y += self.level_editor_grid_sizes[self.level_editor_grid_size_pointer] * round(dy / 10)
                         else:
                             self.editor_true_pos[0] += dx
                             self.editor_true_pos[1] += dy
                             self.second_magic_number_x -= dx
                             self.second_magic_number_y -= dy
+                            self.zero_point.x += dx
+                            self.zero_point.y += dy
                         self.level_editor_chosen_block_preview_image.sprite.x = self.roundedmousex
                         self.level_editor_chosen_block_preview_image.sprite.y = self.roundedmousey
                         self.editor_crosshair.x = self.roundedmousex
@@ -744,12 +752,12 @@ class Main_Window(pyglet.window.Window):
                         if not self.block_images_pointer > len(self.block_images) - 2:
                             self.block_images_pointer += 1
                         self.arrange_block_images(False)
-                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.level_editor_chosen_block_preview_image.sprite.x, self.level_editor_chosen_block_preview_image.sprite.y, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.level_editor_chosen_block_preview_image.sprite.x, self.level_editor_chosen_block_preview_image.sprite.y,0,0, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
                     if symbol == pyglet.window.key.Q:
                         if self.block_images_pointer > 0:
                             self.block_images_pointer -= 1
                         self.arrange_block_images(True)
-                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.level_editor_chosen_block_preview_image.sprite.x, self.level_editor_chosen_block_preview_image.sprite.y, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
+                        self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.level_editor_chosen_block_preview_image.sprite.x, self.level_editor_chosen_block_preview_image.sprite.y,0,0, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
                     if symbol == pyglet.window.key.G:
                         self.level_editor_block_set_rotation = 0
             case "game":
@@ -766,6 +774,7 @@ class Main_Window(pyglet.window.Window):
         self.resize_gui(1)
         if self.editing_level and self.gamestage == "level_editor":
             self.edit_level_loader(self.editing_map) #bookmark1
+        print(self.blocks)
         pyglet.gl.glViewport(0, 0, *self.get_framebuffer_size())
         self.projection = pyglet.math.Mat4.orthogonal_projection(0, width, 0, height, -255, 255)
     def on_key_release(self, symbol, modifier):
@@ -862,9 +871,12 @@ class Main_Window(pyglet.window.Window):
                         #else:
                         #    self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (((self.roundedmousex - self.width //2) + self.editor_true_pos[0]) + (self.width - self.magic_number_x)//2) - self.second_magic_number_x, (((self.roundedmousey - self.height//2) + self.editor_true_pos[1]) + (self.height - self.magic_number_y)//2) - self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, False, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
                         if self.block_images_pointer == self.coin_image_index: 
-                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (self.editor_true_pos[0] + (self.editor_crosshair.x - self.width//2)) + self.second_magic_number_x, (self.editor_true_pos[1] + (self.editor_crosshair.y - self.height//2)) + self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, True, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
+                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (self.editor_true_pos[0] + (self.editor_crosshair.x - self.width//2)) + self.second_magic_number_x, (self.editor_true_pos[1] + (self.editor_crosshair.y - self.height//2)) + self.second_magic_number_y, 0, 0, self.level_editor_block_set_rotation, self.level_editor_editing_background, True, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
                         else:
-                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (self.editor_true_pos[0] + (self.editor_crosshair.x - self.width//2)) + self.second_magic_number_x, (self.editor_true_pos[1] + (self.editor_crosshair.y - self.height//2)) + self.second_magic_number_y, self.level_editor_block_set_rotation, self.level_editor_editing_background, False, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
+                            self.blocks.append(Block(self.block_images_location[self.block_images_pointer], (self.editor_true_pos[0] + (self.editor_crosshair.x - self.width//2)) + self.second_magic_number_x, (self.editor_true_pos[1] + (self.editor_crosshair.y - self.height//2)) + self.second_magic_number_y, 0, 0, self.level_editor_block_set_rotation, self.level_editor_editing_background, False, self.level_editor_batch, self.layers[self.level_editor_layer], self.level_editor_layer))
+                        
+                        self.blocks[len(self.blocks) - 1].true_x = self.blocks[len(self.blocks) - 1].sprite.x - self.zero_point.x
+                        self.blocks[len(self.blocks) - 1].true_y = self.blocks[len(self.blocks) - 1].sprite.y - self.zero_point.y
             case "game":
                 if self.paused:
                     if tools.separating_axis_theorem(tools.getRect(self.quit_button2), tools.getRect(tools.center_image(pyglet.shapes.Rectangle(x,y, 5, 5, (0,0,0))))):
@@ -982,8 +994,8 @@ class Particle(object):
         self.sprite.x -= self.speed * math.cos( math.radians(-self.rotation + 90))
         self.sprite.y -= self.speed * math.sin( math.radians(-self.rotation + 90))
 class Block(object):
-    def __init__(self,image,x,y,rotation, isBackground, isCoin, batch, group, layernumber=0):
-        print(x, y)
+    def __init__(self,image,x,y, truex, truey, rotation, isBackground, isCoin, batch, group, layernumber=0):
+
         try:
             self.sprite = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load(image)), x,y, batch=batch, group=group)
         except TypeError:
@@ -991,8 +1003,8 @@ class Block(object):
         self.image_location = f"{image}"
         self.layer = layernumber
         self.iscoin = isCoin
-        self.true_x = x
-        self.true_y = y
+        self.true_x = truex
+        self.true_y = truey
         self.sprite.rotation = rotation
         self.background_object = isBackground
     def destroy(self):

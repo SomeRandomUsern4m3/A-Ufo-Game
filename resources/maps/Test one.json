@@ -1,0 +1,5 @@
+{
+"name": "Test one",
+"blocks": [["./resources/blocks/big_block_blue.png",512,384, 0, 0, 0, 3],["./resources/blocks/big_block_blue.png",640,384, 0, 0, 0, 3],["./resources/blocks/big_block_blue.png",768,384, 0, 0, 0, 3],["./resources/blocks/big_block_blue.png",896,384, 0, 0, 0, 3],["./resources/blocks/big_block_blue.png",384,384, 0, 0, 0, 3],["./resources/blocks/big_block_green.png",448,576, 0, 0, 0, 3],["./resources/blocks/big_block_green.png",1408,384, 0, 0, 0, 3]],
+"player_start_pos": [0, 0]
+}
