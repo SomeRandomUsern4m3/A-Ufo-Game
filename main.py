@@ -526,7 +526,7 @@ class Main_Window(pyglet.window.Window):
                                 font_size=96,
                                 x=self.width//2, y=self.height//2 + 300,
                                 anchor_x='center', anchor_y='center')
-        self.splash_screen_credit1 = pyglet.text.Label('Assets and ideas made by Renato',
+        self.splash_screen_credit1 = pyglet.text.Label('Game made by Renato',
                                 font_name='Arial', bold=True,
                                 font_size=40,
                                 x=self.width//2, y=self.height//2,
