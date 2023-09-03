@@ -223,12 +223,12 @@ class Main_Window(pyglet.window.Window):
              #   self.editor_true_pos[0] += self.editor_move_speed * dt
               #  for i in self.blocks:
                #     i.sprite.x -= self.editor_move_speed * dt
-            if i == pyglet.window.key.RIGHT:
-                self.level_editor_block_set_rotation += self.editor_rotate_speed
-                self.level_editor_chosen_block_preview_image.sprite.rotation = self.level_editor_block_set_rotation
-            if i == pyglet.window.key.LEFT:
-                self.level_editor_block_set_rotation -= self.editor_rotate_speed
-                self.level_editor_chosen_block_preview_image.sprite.rotation = self.level_editor_block_set_rotation
+            #if i == pyglet.window.key.RIGHT:
+             #   self.level_editor_block_set_rotation += self.editor_rotate_speed
+              #  self.level_editor_chosen_block_preview_image.sprite.rotation = self.level_editor_block_set_rotation
+            #if i == pyglet.window.key.LEFT:
+             #   self.level_editor_block_set_rotation -= self.editor_rotate_speed
+              #  self.level_editor_chosen_block_preview_image.sprite.rotation = self.level_editor_block_set_rotation
             self.block_rotation_label.text = f"Block Rotation: {self.level_editor_block_set_rotation}"
     def shuffle_block_images(self, chosen_index=0):
         index = 0
@@ -392,7 +392,7 @@ class Main_Window(pyglet.window.Window):
         self.level_editor_menu_tips.append(pyglet.text.Label('Use the left and right arrows to rotate the block you are placing, Press G to reset rotation', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[len(self.level_editor_menu_tips) - 1].y - 20,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order))
         self.level_editor_menu_tips.append(pyglet.text.Label('Press F to delete blocks', font_name='Arial', font_size=12, color=(255,255,255,255),x=self.width//2, y=self.level_editor_menu_tips[len(self.level_editor_menu_tips) - 1].y - 20,anchor_x='center', anchor_y='top', batch=no_draw_batch, group=self.ledit_gui_order))
         self.editor_move_speed = 100
-        self.editor_rotate_speed = 0.5
+        self.editor_rotate_speed = 5
         self.load_block_images()
         self.editing_level = True
         self.level_editor_chosen_block_preview_image = Block(self.block_images_location[self.block_images_pointer], self.width//2, self.height//2,0,0, self.level_editor_block_set_rotation, False, False, self.level_editor_batch, self.layers[self.level_editor_layer])
@@ -748,6 +748,15 @@ class Main_Window(pyglet.window.Window):
                                 self.level_editor_layer_editing_on_label.text = f"Layer: {self.level_editor_layer} (above player)"
                             elif self.level_editor_layer < 3:
                                 self.level_editor_layer_editing_on_label.text = f"Layer: {self.level_editor_layer} (below player)"
+                    if symbol == pyglet.window.key.RIGHT:
+                        self.level_editor_block_set_rotation += self.editor_rotate_speed
+                        self.level_editor_chosen_block_preview_image.sprite.rotation = self.level_editor_block_set_rotation
+                    if symbol == pyglet.window.key.LEFT:
+                        self.level_editor_block_set_rotation -= self.editor_rotate_speed
+                        self.level_editor_chosen_block_preview_image.sprite.rotation = self.level_editor_block_set_rotation
+                    if self.level_editor_block_set_rotation >= 360 or self.level_editor_block_set_rotation <= -360:
+                        self.level_editor_block_set_rotation = 0
+                        self.level_editor_chosen_block_preview_image.sprite.rotation = 0
                     if symbol == pyglet.window.key.DOWN:
                         if self.level_editor_layer > 0:
                             self.level_editor_layer -= 1
@@ -842,7 +851,7 @@ class Main_Window(pyglet.window.Window):
                         index = 0
                         try:
                             for i in self.level_editor_grid_blocks_x:
-                                if x > i and x > self.level_editor_grid_blocks_x[index + 1]:
+                                if x  > i and x  > self.level_editor_grid_blocks_x[index + 1]:
                                     self.roundedmousex = i
                                 index += 1
                         except IndexError:
@@ -850,7 +859,7 @@ class Main_Window(pyglet.window.Window):
                         index = 0
                         try:
                             for i in self.level_editor_grid_blocks_y:
-                                if y > i and y > self.level_editor_grid_blocks_y[index + 1]:
+                                if y > i and y  > self.level_editor_grid_blocks_y[index + 1]:
                                     self.roundedmousey = i
                                 index += 1
                         except IndexError:
