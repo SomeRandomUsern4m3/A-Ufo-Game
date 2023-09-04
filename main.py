@@ -14,11 +14,8 @@ class Main_Window(pyglet.window.Window):
         self.initiate_variables()
         pyglet.app.run()
     def make_menu(self):
-        self.title_label = pyglet.text.Label('Ufo game',
-                          font_name='Arial',
-                          font_size=96,
-                          x=self.width//2, y=self.height//2 + 200,
-                          anchor_x='center', anchor_y='bottom', batch=self.menu_batch, group=self.m_top_order)
+        tmp_image = tools.center_image(pyglet.image.load("./resources/menu/title.png"), "center", "bottom")
+        self.title_label = pyglet.sprite.Sprite(tmp_image, x=self.width//2, y=self.height//2 + 200, batch=self.menu_batch, group=self.m_top_order)
         self.play_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/menu/play_button.png")), self.width //2, self.height//2, batch=self.menu_batch, group=self.m_top_order)
         self.level_editor_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/menu/level_editor_button.png")), self.play_button.x, self.play_button.y - 210, batch=self.menu_batch, group=self.m_top_order)
         self.quit_button = pyglet.sprite.Sprite(tools.center_image(pyglet.image.load("./resources/menu/quit_button.png")), self.play_button.x, self.level_editor_button.y - 210, batch=self.menu_batch, group=self.m_top_order)
